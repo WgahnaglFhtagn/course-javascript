@@ -5,6 +5,8 @@ function game(context, cellSize) {
 		[9, 10, 11, 12],
 		[13, 14, 15, 0]
 	];
+
+	var clicks = 0;
 	
 	function cellView(x, y) {
 		context.fillStyle = "#32cd32";
@@ -46,7 +48,21 @@ function game(context, cellSize) {
 		if (((x - 1 == nullX || x + 1 == nullX) && y == nullY) || ((y - 1 == nullY || y + 1 == nullY) && x == nullX)) {
 			arr[nullY][nullX] = arr[y][x];
 			arr[y][x] = 0;
+			clicks++;
 		}
+	};
+ 
+	this.victory = function() {
+		var e = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 0]];
+		var res = true;
+		for (var i = 0; i < 4; i++) {
+			for (var j = 0; j < 4; j++) {
+				if (e[i][j] != arr[i][j]) {
+					res = false;
+				}
+			}
+		}
+		return res;
 	};
 	
 	function getRandomBool() {
@@ -70,6 +86,11 @@ function game(context, cellSize) {
 				this.move(x, y);
 			}
 		}
+		clicks = 0;
+	};
+ 
+	this.getClicks = function() {
+		return clicks;
 	};
 	
 }
@@ -87,4 +108,28 @@ window.onload = function() {
 	var g = new game(context, cellSize);
 	g.mix(300);
 	g.draw();
+
+	canvas.onclick = function(e) {
+		var x = (e.pageX - canvas.offsetLeft) / cellSize | 0;
+		var y = (e.pageY - canvas.offsetTop)  / cellSize | 0;
+		event(x, y); 
+	};
+	 
+	canvas.ontouchend = function(e) {
+		var x = (e.touches[0].pageX - canvas.offsetLeft) / cellSize | 0;
+		var y = (e.touches[0].pageY - canvas.offsetTop)  / cellSize | 0;
+		event(x, y);
+	};
+ 
+	function event(x, y) { 
+		g.move(x, y);
+		context.fillRect(0, 0, canvas.width, canvas.height);
+		g.draw();
+		if (g.victory()) {
+			alert("Победа за " + g.getClicks() + " кликов"); 
+			g.mix(300);
+			context.fillRect(0, 0, canvas.width, canvas.height);
+			g.draw(context, cellSize);
+		}
+	}
 }
